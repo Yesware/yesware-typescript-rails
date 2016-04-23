@@ -1,10 +1,12 @@
 require 'typescript/rails'
 require 'typescript-node'
+require 'json'
 
 module Typescript::Rails::Compiler
   class << self
     # @!scope class
     cattr_accessor :default_options
+    cattr_accessor :tsconfig_path
 
     # Replace relative paths specified in /// <reference path="..." /> with absolute paths.
     #
@@ -62,6 +64,49 @@ module Typescript::Rails::Compiler
       rescue Exception => e
         raise "Typescript error in file '#{ts_path}':\n#{e.message}"
       end
+    end
+
+    def compile_tsconfig(tsconfig_path, context)
+      STDOUT.write "Compiling #{tsconfig_path}\n"
+      result = compile_tsconfig_file(tsconfig_path, context)
+      if result.success?
+        result.js
+      else
+        raise result.stderr + result.stdout
+      end
+    end
+
+    def compile_tsconfig_file(tsconfig_path, context)
+      output_file, dependent_files = find_output_file(tsconfig_path)
+
+      dependent_files.each do |file|
+        context.depend_on file
+      end
+
+      stdout, stderr, exit_status = ::TypeScript::Node.tsc(*['--project', tsconfig_path])
+
+      output_js = File.exist?(output_file) ? File.read(output_file) : nil
+      ::TypeScript::Node::CompileResult.new(
+          output_js,
+          exit_status,
+          stdout,
+          stderr,
+      )
+    end
+
+    def find_output_file(tsconfig_path)
+      tsconfig = File.read(tsconfig_path)
+      json = JSON.parse(tsconfig)
+      compiler_options = json['compilerOptions']
+      output_file = File.join(File.dirname(File.expand_path(tsconfig_path)), compiler_options['outFile'])
+
+      dependent_files = []
+      files = json['files']
+      files.each do |file|
+        dependent_files.push(File.join(File.dirname(File.expand_path(tsconfig_path)), file))
+      end
+
+      return output_file, dependent_files
     end
 
   end
