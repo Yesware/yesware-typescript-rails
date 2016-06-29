@@ -34,7 +34,7 @@ And then execute:
 
 ## Usage
 
-Just add a `.js.ts` file in your `app/assets/javascripts` directory and include it just like you are used to do.
+Just add a `.js.ts` file in your `app/assets/javascripts` directory and include it just like you are used to do. Files suffixed with `.tsconfig` will be treated as TypeScript project files, and the compiler options and source files included in the project file will be used to generate a .js file containing the concatenated output of the project compilation.
 
 Configurations:
 
