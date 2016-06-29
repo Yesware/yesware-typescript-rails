@@ -34,7 +34,9 @@ And then execute:
 
 ## Usage
 
-Just add a `.js.ts` file in your `app/assets/javascripts` directory and include it just like you are used to do. Files suffixed with `.tsconfig` will be treated as TypeScript project files, and the compiler options and source files included in the project file will be used to generate a .js file containing the concatenated output of the project compilation.
+Just add a `.js.ts` file in your `app/assets/javascripts` directory and include it just like you are used to do. 
+
+Files suffixed with `.tsconfig` will be treated as TypeScript project files, and the compiler options and source files included in the project file will be used to generate a .js file containing the concatenated output of the project compilation. NOTE: TypeScript >1.8 is required for this feature, since that version is the first to support custom `tsconfig` file paths (file names other than `tsconfig.json`). Since the `typescript-source` gem is still on 1.6, you must install TypeScript >1.8 through npm and set `TypeScript::Src.use_external_tsc = true` in your rails configuration.
 
 Configurations:
 
